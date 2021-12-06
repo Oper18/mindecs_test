@@ -23,14 +23,14 @@ class Parser(object):
     def read_and_operate(self, op: str = "order"):
         if op not in ["order", "gen_output"]:
             return False, "Wrong value of 'op', need to be one of 'order', 'gen_output'"
-        with open(self.input_file, "r") as f:
-            for line in f:
-                if line:
-                    if op == "order":
+        if op == "order":
+            with open(self.input_file, "r") as f:
+                for line in f:
+                    if line:
                         self.write_rec(*line.split(","))
-                    elif op == "gen_output":
-                        self.create_output(line.split(",")[0])
-            return True, "success"
+        elif op == "gen_output":
+            self.create_output()
+        return True, "success"
 
     @staticmethod
     def write_rec(
@@ -50,14 +50,13 @@ class Parser(object):
         with open(os.path.join("tmp/", department), "w") as f:
             f.write(str(amount))
 
-    def create_output(self, department: str):
-        if not os.path.exists(os.path.join("tmp/", department)):
-            return
-        with open(os.path.join("tmp/", department)) as f:
-            amount = f.read()
-        with open(self.output_file, "a") as f:
-            f.write(f"{department},{amount}\n")
-        os.remove(os.path.join("tmp/", department))
+    def create_output(self):
+        for department in os.listdir("tmp"):
+            with open(os.path.join("tmp/", department)) as f:
+                amount = f.read()
+            with open(self.output_file, "a") as f:
+                f.write(f"{department},{amount}\n")
+            os.remove(os.path.join("tmp/", department))
 
 
 parser = Parser("input", "output")
